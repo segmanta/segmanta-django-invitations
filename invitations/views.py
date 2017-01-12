@@ -136,7 +136,7 @@ class AcceptInvite(SingleObjectMixin, View):
                 'invitations/messages/invite_expired.txt',
                 {'email': invitation.email})
             # Redirect to sign-up since they might be able to register anyway.
-            return redirect(app_settings.SIGNUP_REDIRECT)
+            return redirect(app_settings.SIGNUP_REDIRECT, invitation_key=invitation.key)
 
         # The invitation is valid! Accept it and let them finish the sign-up.
         invitation.accepted = True
@@ -154,7 +154,7 @@ class AcceptInvite(SingleObjectMixin, View):
             'invitations/messages/invite_accepted.txt',
             {'email': invitation.email})
 
-        return redirect(app_settings.SIGNUP_REDIRECT)
+        return redirect(app_settings.SIGNUP_REDIRECT, invitation_key=invitation.key)
 
     def get_object(self, queryset=None):
         if queryset is None:
