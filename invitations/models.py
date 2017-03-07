@@ -28,6 +28,8 @@ class Invitation(models.Model):
     sent = models.DateTimeField(verbose_name=_('sent'), null=True)
     inviter = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True)
+    invited = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name='segmanta_invitation', null=True, blank=True)
 
     objects = InvitationManager()
 
