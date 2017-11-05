@@ -22,6 +22,8 @@ class Invitation(AbstractBaseInvitation):
                               max_length=app_settings.EMAIL_MAX_LENGTH)
     created = models.DateTimeField(verbose_name=_('created'),
                                    default=timezone.now)
+    invited = models.ForeignKey(
+        settings.AUTH_USER_MODEL, related_name='segmanta_invitation', null=True, blank=True)
 
     @classmethod
     def create(cls, email, inviter=None, **kwargs):

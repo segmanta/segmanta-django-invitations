@@ -146,7 +146,7 @@ class AcceptInvite(SingleObjectMixin, View):
                 'invitations/messages/invite_expired.txt',
                 {'email': invitation.email})
             # Redirect to sign-up since they might be able to register anyway.
-            return redirect(self.get_signup_redirect())
+            return redirect(self.get_signup_redirect(), invitation_key=invitation.key)
 
         # The invitation is valid.
         # Mark it as accepted now if ACCEPT_INVITE_AFTER_SIGNUP is False.
@@ -158,7 +158,7 @@ class AcceptInvite(SingleObjectMixin, View):
         get_invitations_adapter().stash_verified_email(
             self.request, invitation.email)
 
-        return redirect(self.get_signup_redirect())
+        return redirect(self.get_signup_redirect(), invitation_key=invitation.key)
 
     def get_object(self, queryset=None):
         if queryset is None:
