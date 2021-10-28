@@ -1,4 +1,7 @@
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 from django.test.client import RequestFactory
 from django.test import Client
 
@@ -40,6 +43,34 @@ class TestAllAuthIntegrationAcceptAfterSignup:
         resp = self.client.post(
             reverse('account_signup'),
             {'email': 'email@example.com',
+             'username': 'username',
+             'password1': 'password',
+             'password2': 'password'
+             })
+        invite = Invitation.objects.get(email='email@example.com')
+        assert invite.accepted is True
+
+    @pytest.mark.parametrize('method', [
+        ('get'),
+        ('post'),
+    ])
+    def test_invite_accepted_after_signup_with_altered_case_email(
+            self, settings, method, sent_invitation_by_user_a, user_a):
+        settings.INVITATIONS_ACCEPT_INVITE_AFTER_SIGNUP = True
+        client_with_method = getattr(self.client, method)
+        resp = client_with_method(
+            reverse('invitations:accept-invite',
+                    kwargs={'key': sent_invitation_by_user_a.key}
+                    ), follow=True)
+
+        invite = Invitation.objects.get(email='email@example.com')
+        assert invite.accepted is False
+        form = resp.context_data['form']
+        assert 'email@example.com' == form.fields['email'].initial
+
+        resp = self.client.post(
+            reverse('account_signup'),
+            {'email': 'EMAIL@EXAMPLE.COM',
              'username': 'username',
              'password1': 'password',
              'password2': 'password'

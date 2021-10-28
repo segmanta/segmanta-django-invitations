@@ -1,23 +1,25 @@
 import json
 
-from django.views.generic import FormView, View
-from django.views.generic.detail import SingleObjectMixin
 from django.contrib import messages
-from django.http import Http404, HttpResponse
-from django.shortcuts import redirect
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
-from django.contrib.auth.decorators import login_required
+from django.http import Http404, HttpResponse
+from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
+from django.utils.translation import ugettext_lazy as _
+from django.views.generic import FormView, View
+from django.views.generic.detail import SingleObjectMixin
 
-from .forms import InviteForm, CleanEmailMixin
-from .exceptions import AlreadyInvited, AlreadyAccepted, UserRegisteredEmail
-from .app_settings import app_settings
 from .adapters import get_invitations_adapter
+from .app_settings import app_settings
+from .exceptions import AlreadyAccepted, AlreadyInvited, UserRegisteredEmail
+from .forms import CleanEmailMixin
 from .signals import invite_accepted
-from .utils import get_invitation_model
+from .utils import get_invitation_model, get_invite_form
 
 Invitation = get_invitation_model()
+InviteForm = get_invite_form()
 
 
 class SendInvite(FormView):
@@ -38,10 +40,10 @@ class SendInvite(FormView):
             invite.send_invitation(self.request)
         except Exception:
             return self.form_invalid(form)
-
         return self.render_to_response(
             self.get_context_data(
-                success_message='%s has been invited' % email))
+                success_message=_('%(email)s has been invited') % {
+                    "email": email}))
 
     def form_invalid(self, form):
         return self.render_to_response(self.get_context_data(form=form))
@@ -186,7 +188,7 @@ def accept_invitation(invitation, request, signal_sender):
 
 
 def accept_invite_after_signup(sender, request, user, **kwargs):
-    invitation = Invitation.objects.filter(email=user.email).first()
+    invitation = Invitation.objects.filter(email__iexact=user.email).first()
     if invitation:
         accept_invitation(invitation=invitation,
                           request=request,

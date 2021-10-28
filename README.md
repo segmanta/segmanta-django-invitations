@@ -50,6 +50,20 @@ ACCOUNT_ADAPTER = 'invitations.models.InvitationsAdapter'
 
 ### Sending Invites
 
+First import the model:
+
+```
+from invitations.utils import get_invitation_model
+```
+
+Make an instance of the model:
+
+```
+Invitation = get_invitation_model()
+```
+
+Then finally pass the recipient to the model and send.
+
 ```
 # inviter argument is optional
 invite = Invitation.create('email@example.com', inviter=request.user)
@@ -122,6 +136,10 @@ Bulk invites are supported via JSON.  Post a list of comma separated emails to t
 *  `INVITATIONS_EMAIL_SUBJECT_PREFIX` (default=`None`)
 
     If set to `None` (the default), invitation email subjects will be prefixed with the name of the current Site in brackets (such as `[example.com]`). Set this to a string to for a custom email subject prefix, or an empty string for no prefix.
+
+*  `INVITATIONS_INVITATION_MODEL` (default=`invitations.Invitation`)
+
+    App registry path of the invitation model used in the current project, for customization purposes.
 
 ### Signals
 

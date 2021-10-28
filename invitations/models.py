@@ -2,12 +2,13 @@ import datetime
 
 from django.conf import settings
 from django.contrib.sites.models import Site
-from django.core.urlresolvers import reverse
+try:
+    from django.urls import reverse
+except ImportError:
+    from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils import timezone
 from django.utils.crypto import get_random_string
-from django.utils.encoding import python_2_unicode_compatible
-
 from django.utils.translation import ugettext_lazy as _
 
 from . import signals
@@ -16,7 +17,6 @@ from .app_settings import app_settings
 from .base_invitation import AbstractBaseInvitation
 
 
-@python_2_unicode_compatible
 class Invitation(AbstractBaseInvitation):
     email = models.EmailField(unique=True, verbose_name=_('e-mail address'),
                               max_length=app_settings.EMAIL_MAX_LENGTH)
@@ -42,19 +42,18 @@ class Invitation(AbstractBaseInvitation):
         return expiration_date <= timezone.now()
 
     def send_invitation(self, request, **kwargs):
-        current_site = (kwargs['site'] if 'site' in kwargs
-                        else Site.objects.get_current())
+        current_site = kwargs.pop('site', Site.objects.get_current())
         invite_url = reverse('invitations:accept-invite',
                              args=[self.key])
         invite_url = request.build_absolute_uri(invite_url)
-
-        ctx = {
+        ctx = kwargs
+        ctx.update({
             'invite_url': invite_url,
             'site_name': current_site.name,
             'email': self.email,
             'key': self.key,
             'inviter': self.inviter,
-        }
+        })
 
         email_template = 'invitations/email/email_invite'
 
