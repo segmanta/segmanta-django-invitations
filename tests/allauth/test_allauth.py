@@ -36,7 +36,7 @@ class TestAllAuthIntegrationAcceptAfterSignup:
         invite = Invitation.objects.get(email='email@example.com')
         assert invite.inviter == user_a
         assert invite.accepted is False
-        assert resp.request['PATH_INFO'] == reverse('account_signup')
+        assert resp.request['PATH_INFO'] == reverse('account_signup') + invite.key + '/'
         form = resp.context_data['form']
         assert 'email@example.com' == form.fields['email'].initial
 
@@ -98,7 +98,7 @@ class TestAllAuthIntegration:
         invite = Invitation.objects.get(email='email@example.com')
         assert invite.accepted
         assert invite.inviter == user_a
-        assert resp.request['PATH_INFO'] == reverse('account_signup')
+        assert resp.request['PATH_INFO'] == reverse('account_signup') + invite.key + '/'
 
         form = resp.context_data['form']
         assert 'email@example.com' == form.fields['email'].initial

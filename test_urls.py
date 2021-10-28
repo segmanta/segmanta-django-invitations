@@ -13,3 +13,10 @@ if 'allauth' in settings.INSTALLED_APPS:
     urlpatterns.append(
         url(r'^accounts/', include('allauth.urls'))
     )
+
+    from segmanta_login.views import SegmantaSignupView
+
+    urlpatterns.append(
+        url(r'^accounts/signup/(?P<invitation_key>[0-9A-Za-z]+)/$', SegmantaSignupView.as_view(),
+            name="account_signup")
+    )

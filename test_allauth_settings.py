@@ -20,3 +20,6 @@ AUTHENTICATION_BACKENDS = (
 )
 
 ACCOUNT_ADAPTER = 'invitations.models.InvitationsAdapter'
+
+INSTALLED_APPS = INSTALLED_APPS + ('segmanta_login.apps.SegmantaLoginAppConfig', )
+OPEN_REGISTRATION = True

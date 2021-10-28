@@ -2,6 +2,7 @@ import datetime
 
 from django.conf import settings
 from django.contrib.sites.models import Site
+
 try:
     from django.urls import reverse
 except ImportError:
@@ -23,7 +24,7 @@ class Invitation(AbstractBaseInvitation):
     created = models.DateTimeField(verbose_name=_('created'),
                                    default=timezone.now)
     invited = models.ForeignKey(
-        settings.AUTH_USER_MODEL, related_name='segmanta_invitation', null=True, blank=True)
+        settings.AUTH_USER_MODEL, related_name='segmanta_invitation', null=True, blank=True, on_delete=models.CASCADE)
 
     @classmethod
     def create(cls, email, inviter=None, **kwargs):
@@ -79,6 +80,7 @@ if hasattr(settings, 'ACCOUNT_ADAPTER'):
     if settings.ACCOUNT_ADAPTER == 'invitations.models.InvitationsAdapter':
         from allauth.account.adapter import DefaultAccountAdapter
         from allauth.account.signals import user_signed_up
+
 
         class InvitationsAdapter(DefaultAccountAdapter):
 

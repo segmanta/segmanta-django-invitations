@@ -7,6 +7,7 @@ from django.test import Client
 from django.test.client import RequestFactory
 from django.test.utils import override_settings
 from django.utils import timezone
+
 try:
     from django.urls import reverse
 except ImportError:
@@ -22,7 +23,7 @@ from invitations.adapters import (
 from invitations.app_settings import app_settings
 from invitations.views import AcceptInvite, SendJSONInvite
 from invitations.forms import InviteForm
-from .. models import ExampleSwappableInvitation
+from ..models import ExampleSwappableInvitation
 from invitations.utils import get_invitation_model
 
 Invitation = get_invitation_model()
@@ -86,7 +87,7 @@ class TestInvitationsSendView:
         ('flobble@example.com', 'An active user is'),
     ])
     def test_invalid_form_submissions(
-            self, user_a, user_b, invitation_b, email, error):
+        self, user_a, user_b, invitation_b, email, error):
         self.client.login(username='flibble', password='password')
         resp = self.client.post(
             reverse('invitations:send-invite'), {'email': email})
@@ -189,7 +190,7 @@ class TestInvitationsAcceptView:
         ('post'),
     ])
     def test_accept_invite_accepted_key_error_disabled(
-            self, settings, accepted_invitation, method):
+        self, settings, accepted_invitation, method):
         settings.INVITATIONS_GONE_ON_ACCEPT_ERROR = False
         settings.INVITATIONS_LOGIN_REDIRECT = '/login-url/'
         client_with_method = getattr(self.client, method)
@@ -203,7 +204,7 @@ class TestInvitationsAcceptView:
         ('post'),
     ])
     def test_accept_invite_expired_key(
-            self, settings, sent_invitation_by_user_a, method):
+        self, settings, sent_invitation_by_user_a, method):
         settings.INVITATIONS_INVITATION_EXPIRY = 0
         client_with_method = getattr(self.client, method)
         resp = client_with_method(
@@ -217,7 +218,7 @@ class TestInvitationsAcceptView:
         ('post'),
     ])
     def test_accept_invite_expired_key_error_disabled(
-            self, sent_invitation_by_user_a, method, settings):
+        self, sent_invitation_by_user_a, method, settings):
         settings.INVITATIONS_INVITATION_EXPIRY = 0
         settings.INVITATIONS_GONE_ON_ACCEPT_ERROR = False
         settings.INVITATIONS_SIGNUP_REDIRECT = '/signup-url/'
@@ -233,7 +234,7 @@ class TestInvitationsAcceptView:
         ('post'),
     ])
     def test_accept_invite(
-            self, settings, sent_invitation_by_user_a, user_a, method):
+        self, settings, sent_invitation_by_user_a, user_a, method):
         settings.INVITATIONS_SIGNUP_REDIRECT = '/non-existent-url/'
         client_with_method = getattr(self.client, method)
         resp = client_with_method(
@@ -261,7 +262,7 @@ class TestInvitationSignals:
 
     @patch('invitations.signals.invite_url_sent.send')
     def test_invite_url_sent_triggered_correctly(
-            self, mock_signal, sent_invitation_by_user_a, user_a):
+        self, mock_signal, sent_invitation_by_user_a, user_a):
         invite_url = reverse('invitations:accept-invite',
                              args=[sent_invitation_by_user_a.key])
         request = RequestFactory().get('/')
@@ -284,7 +285,7 @@ class TestInvitationSignals:
     )
     @patch('invitations.signals.invite_accepted.send')
     def test_invite_invite_accepted_triggered_correctly(
-            self, mock_signal, sent_invitation_by_user_a):
+        self, mock_signal, sent_invitation_by_user_a):
         request = RequestFactory().get('/')
         sent_invitation_by_user_a.send_invitation(request)
 
@@ -308,8 +309,8 @@ class TestInvitationsForm:
         ('flobble@example.com', False, 'active user is using this'),
     ])
     def test_form(
-            self, email, form_validity, errors,
-            accepted_invitation, pending_invitation, user_b):
+        self, email, form_validity, errors,
+        accepted_invitation, pending_invitation, user_b):
         form = InviteForm(data={'email': email})
         if errors:
             assert errors in str(form.errors)
@@ -322,8 +323,8 @@ class TestInvitationsForm:
 class TestInvitationsManager:
 
     def test_managers(
-            self, sent_invitation_by_user_a, accepted_invitation,
-            expired_invitation, invitation_b):
+        self, sent_invitation_by_user_a, accepted_invitation,
+        expired_invitation, invitation_b):
         valid = Invitation.objects.all_valid().values_list(
             'email', flat=True)
         expired = Invitation.objects.all_expired().values_list(
@@ -371,9 +372,9 @@ class TestInvitationsJSON:
          201),
     ])
     def test_post(
-            self, settings, data, expected, status_code,
-            user_a, accepted_invitation,
-            pending_invitation, user_b):
+        self, settings, data, expected, status_code,
+        user_a, accepted_invitation,
+        pending_invitation, user_b):
         settings.INVITATIONS_ALLOW_JSON_INVITES = True
         self.client.login(username='flibble', password='password')
         response = self.client.post(
@@ -440,6 +441,6 @@ class TestInvitationsAdmin:
 
         assert response.status_code == 200
         fields = list(response.context_data['adminform'].form.fields.keys())
-        expected_fields = ['accepted',
-                           'key', 'sent', 'inviter', 'email', 'created']
+        expected_fields = ['accepted', 'key', 'sent', 'inviter', 'email', 'created', 'invited']
+
         assert fields == expected_fields
